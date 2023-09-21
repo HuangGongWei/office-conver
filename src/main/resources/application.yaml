@@ -1,0 +1,12 @@
+server:
+  port: 9090
+
+oss:
+  # 指定Endpoint
+  endpoint:
+  # 阿里云账号子用户
+  accessKeyId:
+  # 访问密钥
+  accessKeySecret:
+  # 填写Bucket名称，例如examplebucket。
+  bucketName:
