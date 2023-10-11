@@ -14,13 +14,13 @@ import java.util.Arrays;
 @Getter
 @AllArgsConstructor
 public enum OfficeFileTypeEnum {
-    PPT(1, "ppt"),
-    PPTX(2, "pptx"),
-    PDF(3, "pdf");
+    PPT(1, "PPT"),
+    PPTX(2, "PPTX"),
+    PDF(3, "PDF");
 
     private final Integer code;
 
-    private final String name;
+    private final String vale;
 
     public OfficeFileTypeEnum getByCode(Integer code) {
         if (code == null) {
