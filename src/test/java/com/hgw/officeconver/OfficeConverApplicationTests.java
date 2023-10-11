@@ -6,9 +6,11 @@ import com.hgw.officeconver.converter.PPTToPNGConverter;
 import com.hgw.officeconver.converter.PPTXToPNGConverter;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.ActiveProfiles;
 
 import java.util.List;
 
+@ActiveProfiles("local")
 @SpringBootTest
 class OfficeConverApplicationTests {
 
