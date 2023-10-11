@@ -1,12 +1,19 @@
 package com.hgw.officeconver.converter;
 
+import org.apache.poi.hslf.usermodel.HSLFTextParagraph;
+import org.apache.poi.hslf.usermodel.HSLFTextRun;
+import org.apache.poi.hslf.usermodel.HSLFTextShape;
 import org.apache.poi.sl.usermodel.Slide;
+import org.apache.poi.xslf.usermodel.XSLFTextParagraph;
+import org.apache.poi.xslf.usermodel.XSLFTextRun;
+import org.apache.poi.xslf.usermodel.XSLFTextShape;
 
 import java.awt.*;
 import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.util.List;
 
 /**
  * Description: 抽象ppt转换为图片转换器
@@ -17,6 +24,11 @@ import java.io.IOException;
 public abstract class AbstractPPTToPNGConverter extends BaseConverter {
 
     private final static double IMAGE_SCALE = 5;
+
+    /**
+     * 默认字体
+     */
+    private final static String DEFAULT_FONT_FAMILY = "苹方 常规";
 
     public AbstractPPTToPNGConverter(String inputPath) {
         super(inputPath);
@@ -31,6 +43,30 @@ public abstract class AbstractPPTToPNGConverter extends BaseConverter {
      * @return 图片于oss文件链接
      */
     protected String toPNG(int pgWidth, int pgHeight, Slide slide) {
+        // 统一字体
+        List shapes = slide.getShapes();
+        for (Object shape : shapes) {
+            if (shape instanceof XSLFTextShape) {
+                XSLFTextShape sh = (XSLFTextShape) shape;
+                java.util.List<XSLFTextParagraph> textParagraphs = sh.getTextParagraphs();
+                for (XSLFTextParagraph textParagraph : textParagraphs) {
+                    java.util.List<XSLFTextRun> textRuns = textParagraph.getTextRuns();
+                    for (XSLFTextRun textRun : textRuns) {
+                        textRun.setFontFamily(DEFAULT_FONT_FAMILY);
+                    }
+                }
+            }
+            if (shape instanceof HSLFTextShape) {
+                HSLFTextShape sh = (HSLFTextShape) shape;
+                java.util.List<HSLFTextParagraph> textParagraphs = sh.getTextParagraphs();
+                for (HSLFTextParagraph textParagraph : textParagraphs) {
+                    List<HSLFTextRun> textRuns = textParagraph.getTextRuns();
+                    for (HSLFTextRun textRun : textRuns) {
+                        textRun.setFontFamily(DEFAULT_FONT_FAMILY);
+                    }
+                }
+            }
+        }
 
         int imageWidth = (int) Math.floor(IMAGE_SCALE * pgWidth);
         int imageHeight = (int) Math.floor(IMAGE_SCALE * pgHeight);
