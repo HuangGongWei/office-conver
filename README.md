@@ -254,4 +254,4 @@ public class PPTXToPNGConverter extends AbstractPPTToPNGConverter {
 
 ## 验收一下
 
-![在这里插入图片描述](https://img-blog.csdnimg.cn/e3624598dd7846cba0b299e721f10326.png)
+![输入图片说明](src/main/resources/images/e3624598dd7846cba0b299e721f10326.png)
