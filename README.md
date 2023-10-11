@@ -255,3 +255,112 @@ public class PPTXToPNGConverter extends AbstractPPTToPNGConverter {
 ## 验收一下
 
 ![输入图片说明](src/main/resources/images/e3624598dd7846cba0b299e721f10326.png)
+
+
+
+
+
+# 部署服务器遇到的问题
+
+> 自此office转换图片的功能基本实现，我们部署至服务器！
+
+## 1、PPT/PPTX转换时中文乱码问题
+
+当我们在本地测试一切ok，提测后部署到服务器之后突然收到了一个**BUG**（中文乱码，成方框`口`）!
+
+![image-20231011111909139](README.assets/image-20231011111909139.png)
+
+那是因为ppt内容中字体不支持，服务器未安装中文字体，一般我们的服务器部署方案不支持做这件事（将所有的字体下载至镜像），业务代码的服务器都在 k8s 集群上，相对都是无状态的，没有什么其它额外的东西，如果将所有字体放进去整个镜像会特别大不太适合走 k8s这套了。若非要这样的话，推荐重新部署一台服务器，专门用于文件转换。当然，有条件的铁铁就不用考虑啦，直接下载所有字体！
+
+> 如果未安装，可通过 yum -y install fontconfig 安装，然后在/usr/share 目录下会发现 fonts目录，下载中文字体如：heiti.ttf
+>
+> 拷贝到fonts目录下，chmod 赋权限。再次执行 fc-list :" class="has" data-src="/image/https://img-blog.csdnimg.cn/20181106180741352.png" height="54" src="/assets/images/photo.gif" width="738"/>
+>
+> 如果是docker环境，则可将上述安装步骤写入到dockerfile中。
+
+**这里演示没有条件的解决方案**，下载 "苹方"字体，并在PPT/PPT转换文件时统一字体为 "苹方"（当然可以是其他字体，如“宋体”……）
+
+第一步、下载字体
+
+![image-20231011172344862](README.assets/image-20231011172344862.png)
+
+第二步、编写dockerfile安装字体
+
+```
+#PDF 转图片中文乱码#
+RUN set -xe \
+&& apk --no-cache add fontconfig
+#&& apk --no-cache add ttf-dejavu fontconfig
+COPY pingfang.ttf /usr/share/fonts/ttf-dejavu/pingfang.ttf
+#PDF 转图片中文乱码#
+```
+
+第三步、转换器中指定字体
+
+![image-20231011172921325](README.assets/image-20231011172921325.png)
+
+
+
+## 2、OOM问题
+
+由于转换是ppt的每一页进行单独转换，如果ppt页数多，可能会慢。 解决办法，一种是减小上文中的image_rate，如设置为1。还有就是可以通过多线程并发转换，但是由于该转换操作是CPU密集型操作，所以需要根据机器性能决定。具体代码如下：
+
+**文件转换器专用线程工具类**：
+
+> 根据机器性能线程池配置如下（大家根据自己的服务器自行调**前三项**）：
+>
+> + 核心线程池大小：5
+> + 最大线程池大小：5
+> + 阻塞工作队列：2
+> + 拒绝策略：调用方执行（此处核心，请勿改动！当然有条件的除外）
+>
+> 因为本文主要是讲解office文件转换至图片，关于线程池的相关知识这里不做解释，给大家推荐一本书《Java并发编程的艺术》
+
+```java
+package com.hgw.officeconver.thread;
+
+import lombok.extern.slf4j.Slf4j;
+
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
+import java.util.function.Supplier;
+
+/**
+ * Description: 文件转换器专用线程工具
+ *
+ * @author LinHuiBa-YanAn
+ * @date 2023/10/10 16:23
+ */
+@Slf4j
+public class BizThreadPool {
+
+    private static ThreadPoolExecutor threadPoolExecutor = new ThreadPoolExecutor(5, 5, 2, TimeUnit.SECONDS, new LinkedBlockingQueue<>(1), new ThreadPoolExecutor.CallerRunsPolicy());
+
+
+    /**
+     * 线程执行（有返回值）
+     *
+     * @param supplier
+     * @param <T>
+     * @return
+     */
+    public static <T> CompletableFuture<T> supplyAsync(Supplier<T> supplier) {
+        return CompletableFuture.supplyAsync(() -> {
+            try {
+                return supplier.get();
+            } catch (Exception e) {
+                log.warn("异步执行错误", e);
+                throw e;
+            }
+        }, threadPoolExecutor);
+    }
+
+}
+```
+
+以PDF转换代码为例：
+
+![image-20231011135343783](README.assets/image-20231011135343783.png)
+
