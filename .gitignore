@@ -4,6 +4,9 @@ target/
 !**/src/main/**/target/
 !**/src/test/**/target/
 
+*-local.yml
+*-local.yaml
+
 ### STS ###
 .apt_generated
 .classpath
@@ -31,6 +34,3 @@ build/
 
 ### VS Code ###
 .vscode/
-
-*-local.yml
-*-local.yaml
