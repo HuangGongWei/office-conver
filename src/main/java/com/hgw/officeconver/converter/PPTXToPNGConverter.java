@@ -1,5 +1,6 @@
 package com.hgw.officeconver.converter;
 
+import com.hgw.officeconver.thread.BizThreadPool;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.poi.xslf.usermodel.XMLSlideShow;
 import org.apache.poi.xslf.usermodel.XSLFSlide;
@@ -7,7 +8,9 @@ import org.apache.poi.xslf.usermodel.XSLFSlide;
 import java.awt.*;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
 
 /**
  * Description: pptx转换为图片转换器
@@ -30,12 +33,17 @@ public class PPTXToPNGConverter extends AbstractPPTToPNGConverter {
             is = getInputStream(inputFileUrl);
             ppt = new XMLSlideShow(is);
             Dimension pgSize = ppt.getPageSize();
+            List<CompletableFuture<String>> completableFutures = new ArrayList<>();
             for (XSLFSlide slide : ppt.getSlides()) {
-                String url = toPNG(pgSize.width, pgSize.height, slide);
-                outPathUrlList.add(url);
+                completableFutures.add(BizThreadPool.supplyAsync(() -> toPNG(pgSize.width, pgSize.height, slide)));
             }
-        } catch (IOException e) {
-            log.error("pptx转换图片失败,{}", e.getMessage());
+            CompletableFuture<Void> completableFuture = CompletableFuture.allOf(completableFutures.toArray(new CompletableFuture[0]));
+            completableFuture.get();
+            for (CompletableFuture<String> future : completableFutures) {
+                outPathUrlList.add(future.get());
+            }
+        } catch (Exception e) {
+            log.error("pptx转换图片失败,{}", e);
             throw new RuntimeException("pptx转换图片失败" + e.getMessage());
         } finally {
             try {

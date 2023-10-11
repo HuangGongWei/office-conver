@@ -6,6 +6,7 @@ import com.aliyun.oss.model.CannedAccessControlList;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
+import java.io.IOException;
 import java.io.InputStream;
 
 /**
@@ -46,6 +47,11 @@ public class OSSUtil {
         } catch (Exception e) {
             e.printStackTrace();
         } finally {
+            try {
+                inputStream.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
             if (ossClient != null) {
                 // 关闭 ossClient
                 ossClient.shutdown();

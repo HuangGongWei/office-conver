@@ -1,5 +1,6 @@
 package com.hgw.officeconver.converter;
 
+import com.hgw.officeconver.thread.BizThreadPool;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.rendering.PDFRenderer;
@@ -8,7 +9,9 @@ import java.awt.image.BufferedImage;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
 
 /**
  * Description: pdf转换为图片转换器
@@ -19,7 +22,7 @@ import java.util.List;
 @Slf4j
 public class PDFToPNGConverter extends BaseConverter {
 
-    private static final float IMAGE_SCALE = 8;
+    private static final float IMAGE_SCALE = 1;
 
     public PDFToPNGConverter(String inputPath) {
         super(inputPath);
@@ -33,17 +36,18 @@ public class PDFToPNGConverter extends BaseConverter {
             PDDocument document = PDDocument.load(is);
             PDFRenderer renderer = new PDFRenderer(document);
             int pageSize = document.getNumberOfPages();
+            List<CompletableFuture<String>> completableFutures = new ArrayList<>();
             for (int i = 0; i < pageSize; i++) {
-                BufferedImage img = renderer.renderImage(i, IMAGE_SCALE);
-                // save the output
-                try (ByteArrayOutputStream bos = new ByteArrayOutputStream()) {
-                    javax.imageio.ImageIO.write(img, "png", bos);
-                    String url = uploadFileToOss(bos);
-                    outPathUrlList.add(url);
-                }
+                int index = i;
+                completableFutures.add(BizThreadPool.supplyAsync(() -> toPNG(renderer, index)));
+            }
+            CompletableFuture<Void> completableFuture = CompletableFuture.allOf(completableFutures.toArray(new CompletableFuture[0]));
+            completableFuture.get();
+            for (CompletableFuture<String> future : completableFutures) {
+                outPathUrlList.add(future.get());
             }
         } catch (Exception e) {
-            log.error("pdf转换图片失败,{}", e.getMessage());
+            log.error("pdf转换图片失败,{}", e);
             throw new RuntimeException("pdf转换图片失败" + e.getMessage());
         } finally {
             try {
@@ -57,4 +61,30 @@ public class PDFToPNGConverter extends BaseConverter {
         return outPathUrlList;
     }
 
+
+    /**
+     * 每页转换图片且上传oss
+     *
+     * @param renderer PDF渲染器
+     * @param index    下标
+     * @return 图片于oss文件链接
+     */
+    private String toPNG(PDFRenderer renderer, Integer index) {
+        ByteArrayOutputStream bos = new ByteArrayOutputStream();
+        try {
+            BufferedImage img = renderer.renderImage(index, IMAGE_SCALE);
+            javax.imageio.ImageIO.write(img, "png", bos);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        try {
+            return uploadFileToOss(bos);
+        } finally {
+            try {
+                bos.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+    }
 }

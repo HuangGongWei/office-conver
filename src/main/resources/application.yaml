@@ -3,10 +3,10 @@ server:
 
 oss:
   # 指定Endpoint
-  endpoint:
+  endpoint: XXX
   # 阿里云账号子用户
-  accessKeyId:
+  accessKeyId: XXX
   # 访问密钥
   accessKeySecret:
   # 填写Bucket名称，例如examplebucket。
-  bucketName:
+  bucketName: XXX

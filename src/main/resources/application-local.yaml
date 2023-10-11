@@ -1,0 +1,8 @@
+server:
+  port: 9090
+
+oss:
+  endpoint: https://oss-cn-hangzhou.aliyuncs.com
+  accessKeyId: LTAI5tPGKVfp3zpiKZjtKAEn
+  accessKeySecret: 9PukV5X8DTDzhDSUhz3QApDOd56O49
+  bucketName: campus-epidemic-prevention

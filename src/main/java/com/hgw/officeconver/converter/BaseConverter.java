@@ -40,7 +40,7 @@ public abstract class BaseConverter {
 
     public BaseConverter(String inputPath) {
         this.inputFileUrl = inputPath;
-        outPathUrlList = new ArrayList<String>();
+        outPathUrlList = new ArrayList<>();
     }
 
     /**
@@ -67,7 +67,7 @@ public abstract class BaseConverter {
                 return null;
             }
         } catch (IOException e) {
-            log.error("下载资源失败,{}", e.getMessage());
+            log.error("下载资源失败,{}", e);
             throw new RuntimeException("加载资源失败" + e.getMessage());
         }
     }

@@ -16,22 +16,22 @@ import java.io.IOException;
  */
 public abstract class AbstractPPTToPNGConverter extends BaseConverter {
 
-    private final static double IMAGE_SCALE = 8;
+    private final static double IMAGE_SCALE = 5;
 
     public AbstractPPTToPNGConverter(String inputPath) {
         super(inputPath);
     }
 
     /**
-     * 幻灯片转换图片方法并且上传oss
+     * 幻灯片转换图片且上传oss
      *
      * @param pgWidth  宽
      * @param pgHeight 高
      * @param slide    幻灯片
      * @return 图片于oss文件链接
-     * @throws IOException
      */
-    protected String toPNG(int pgWidth, int pgHeight, Slide slide) throws IOException {
+    protected String toPNG(int pgWidth, int pgHeight, Slide slide) {
+
         int imageWidth = (int) Math.floor(IMAGE_SCALE * pgWidth);
         int imageHeight = (int) Math.floor(IMAGE_SCALE * pgHeight);
 
@@ -44,11 +44,18 @@ public abstract class AbstractPPTToPNGConverter extends BaseConverter {
         // save the output
         ByteArrayOutputStream bos = new ByteArrayOutputStream();
         try {
-            bos = new ByteArrayOutputStream();
             javax.imageio.ImageIO.write(img, "png", bos);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        try {
             return uploadFileToOss(bos);
         } finally {
-            bos.close();
+            try {
+                bos.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
         }
     }
 }
