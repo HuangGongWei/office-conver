@@ -16,7 +16,7 @@ class OfficeConverApplicationTests {
 
     @Test
     public void pptxToPNGConverterTest() {
-        PPTXToPNGConverter pptxToPNGConverter = new PPTXToPNGConverter("https://files.location.pub/linmXGvy6NfvrKI_tMh4Efo5mMLI");
+        PPTXToPNGConverter pptxToPNGConverter = new PPTXToPNGConverter("pptx文件链接");
         List<String> urlList = pptxToPNGConverter.convertToPNG();
         System.out.println(JSONObject.toJSONString(urlList));
     }
