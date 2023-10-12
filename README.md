@@ -260,7 +260,7 @@ public class PPTXToPNGConverter extends AbstractPPTToPNGConverter {
 
 
 
-# 部署服务器遇到的问题
+# 踩坑经历
 
 > 自此office转换图片的功能基本实现，我们部署至服务器！
 
@@ -368,7 +368,19 @@ public class BizThreadPool {
 
 ## 3、Cannot read JPEG2000 image: Java Advanced Imaging (JAI) Image I/O Tools are not installed 问题解决
 
-我们发现ppt中包含JPEG2000格式的图片的幻灯片时，图片将渲染不出来，通过查看日志发现以下报错。
+我们发现pdf中包含JPEG2000格式的图片时，图片将渲染不出来。
+
+pdf效果
+
+![image-20231012180141808](README.assets/image-20231012180141808.png)
+
+转换后：
+
+![image-20231012180101200](README.assets/image-20231012180101200.png)
+
+
+
+通过查看日志发现以下报错。
 
 ![image-20231012170507727](README.assets/image-20231012170507727.png)
 
@@ -394,3 +406,28 @@ public class BizThreadPool {
 
 
 
+## 4、Could not read embedded TTF for font AAAAAI+MicrosoftYaHeiLight 问题处理
+
+我们发现pdf中包含一些特殊字体时，解析之后将会是一串编码。
+
+pdf效果：
+
+![image-20231012200632705](README.assets/image-20231012200632705.png)
+
+转换后：
+
+![image-20231012180034463](README.assets/image-20231012180034463.png)
+
+通过查看日志发现以下报错。
+
+![image-20231012173141699](README.assets/image-20231012173141699.png)
+
+引入以下包：
+
+```xml
+<dependency>
+    <groupId>com.itextpdf</groupId>
+    <artifactId>itextpdf</artifactId>
+    <version>5.5.10</version>
+</dependency>
+```
