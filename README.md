@@ -368,5 +368,29 @@ public class BizThreadPool {
 
 ## 3、Cannot read JPEG2000 image: Java Advanced Imaging (JAI) Image I/O Tools are not installed 问题解决
 
-不能读取JPEG2000格式的图片，需要引入以下工具。
+我们发现ppt中包含JPEG2000格式的图片的幻灯片时，图片将渲染不出来，通过查看日志发现以下报错。
+
+![image-20231012170507727](README.assets/image-20231012170507727.png)
+
+上传是不能读取JPEG2000格式的图片，需要引入以下工具。
+
+~~~xml
+  <dependency>
+      <groupId>com.github.jai-imageio</groupId>
+      <artifactId>jai-imageio-core</artifactId>
+      <version>1.4.0</version>
+  </dependency>
+  <dependency>
+      <groupId>com.github.jai-imageio</groupId>
+      <artifactId>jai-imageio-jpeg2000</artifactId>
+      <version>1.3.0</version>
+  </dependency>
+  <dependency>
+      <groupId>org.apache.pdfbox</groupId>
+      <artifactId>jbig2-imageio</artifactId>
+      <version>3.0.3</version>
+  </dependency>
+~~~
+
+
 
