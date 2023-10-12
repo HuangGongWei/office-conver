@@ -364,3 +364,9 @@ public class BizThreadPool {
 
 ![image-20231011135343783](README.assets/image-20231011135343783.png)
 
+
+
+## 3、Cannot read JPEG2000 image: Java Advanced Imaging (JAI) Image I/O Tools are not installed 问题解决
+
+不能读取JPEG2000格式的图片，需要引入以下工具。
+
