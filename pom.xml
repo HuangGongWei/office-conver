@@ -132,9 +132,21 @@
         </dependency>
 
         <dependency>
+            <groupId>org.xhtmlrenderer</groupId>
+            <artifactId>core-renderer</artifactId>
+            <version>R8</version>
+        </dependency>
+
+        <dependency>
+            <groupId>net.sourceforge.nekohtml</groupId>
+            <artifactId>nekohtml</artifactId>
+            <version>1.9.14</version>
+        </dependency>
+
+        <dependency>
             <groupId>gui.ava</groupId>
             <artifactId>html2image</artifactId>
-            <version>0.9</version>
+            <version>2.0.1</version>
         </dependency>
 
     </dependencies>
