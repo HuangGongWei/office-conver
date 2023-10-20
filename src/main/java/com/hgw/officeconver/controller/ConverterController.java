@@ -1,6 +1,6 @@
 package com.hgw.officeconver.controller;
 
-import com.hgw.officeconver.dto.FileDTO;
+import com.hgw.officeconver.dto.FileConverterDTO;
 import com.hgw.officeconver.service.FileConvertService;
 import com.hgw.officeconver.vo.ImagesVO;
 import lombok.extern.slf4j.Slf4j;
@@ -27,12 +27,12 @@ public class ConverterController {
     private FileConvertService fileConvertService;
 
     /**
-     * 文件转换
+     * 转换
      * @param dto
      * @return
      */
     @PostMapping(value = "/convert")
-    public ImagesVO fileConvert(@RequestBody @Validated FileDTO dto) {
+    public ImagesVO fileConvert(@RequestBody @Validated FileConverterDTO dto) {
         return new ImagesVO(fileConvertService.fileConvert(dto));
     }
 }

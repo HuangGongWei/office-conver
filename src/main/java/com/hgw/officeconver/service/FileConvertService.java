@@ -1,6 +1,6 @@
 package com.hgw.officeconver.service;
 
-import com.hgw.officeconver.dto.FileDTO;
+import com.hgw.officeconver.dto.FileConverterDTO;
 
 import java.util.List;
 
@@ -17,5 +17,5 @@ public interface FileConvertService {
      * @param dto 文件
      * @return 图片集合
      */
-    List<String> fileConvert(FileDTO dto);
+    List<String> fileConvert(FileConverterDTO dto);
 }

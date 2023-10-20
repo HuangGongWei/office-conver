@@ -1,9 +1,8 @@
 package com.hgw.officeconver.service.impl;
 
-import com.hgw.officeconver.converter.PDFToPNGConverter;
-import com.hgw.officeconver.converter.PPTToPNGConverter;
-import com.hgw.officeconver.converter.PPTXToPNGConverter;
-import com.hgw.officeconver.dto.FileDTO;
+import com.hgw.officeconver.converter.*;
+import com.hgw.officeconver.dto.FileConverterDTO;
+import com.hgw.officeconver.enums.FileConvertTypeEnum;
 import com.hgw.officeconver.service.FileConvertService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -23,26 +22,23 @@ import java.util.Objects;
 public class FileConvertServiceImpl implements FileConvertService {
 
     @Override
-    public List<String> fileConvert(FileDTO dto) {
-        List<String> result = new ArrayList<>();
-        if (Objects.isNull(dto) || Objects.isNull(dto.getType()) || Objects.isNull(dto.getUrl())) {
-            return result;
+    public List<String> fileConvert(FileConverterDTO dto) {
+        FileConvertTypeEnum convertTypeEnum = FileConvertTypeEnum.getByCode(dto.getConvertTypeCode());
+        BaseConverter converter = null;
+        if (FileConvertTypeEnum.PPT_TO_PNG.equals(convertTypeEnum)) {
+            converter = new PPTToPNGConverter(dto.getInputSource());
+        } else if (FileConvertTypeEnum.PPTX_TO_PNG.equals(convertTypeEnum)) {
+            converter = new PPTXToPNGConverter(dto.getInputSource());
+        } else if (FileConvertTypeEnum.PDF_TO_PNG.equals(convertTypeEnum)) {
+            converter = new PDFToPNGConverter(dto.getInputSource());
+        } else if (FileConvertTypeEnum.HTML_TO_PNG.equals(convertTypeEnum)) {
+            converter = new HtmlToPNGConverter(dto.getInputSource());
         }
-        switch (dto.getType().toUpperCase()) {
-            case "PDF":
-                PDFToPNGConverter pdfConverter = new PDFToPNGConverter(dto.getUrl());
-                result = pdfConverter.convertToPNG();
-                break;
-            case "PPT":
-                PPTToPNGConverter pptConverter = new PPTToPNGConverter(dto.getUrl());
-                result = pptConverter.convertToPNG();
-                break;
-            case "PPTX":
-                PPTXToPNGConverter pptxConverter = new PPTXToPNGConverter(dto.getUrl());
-                result = pptxConverter.convertToPNG();
-                break;
+        List<String> urls = new ArrayList<>();
+        if (Objects.nonNull(converter)) {
+            urls = converter.convertToPNG();
         }
-        return result;
+        return urls;
     }
 
 }

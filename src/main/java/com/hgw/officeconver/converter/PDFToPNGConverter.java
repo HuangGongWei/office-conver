@@ -32,7 +32,7 @@ public class PDFToPNGConverter extends BaseConverter {
     public List<String> convertToPNG() {
         InputStream is = null;
         try {
-            is = getInputStream(inputFileUrl);
+            is = getInputStream(inputSource);
             PDDocument document = PDDocument.load(is);
             PDFRenderer renderer = new PDFRenderer(document);
             int pageSize = document.getNumberOfPages();

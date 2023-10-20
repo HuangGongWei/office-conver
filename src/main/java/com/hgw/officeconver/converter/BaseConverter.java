@@ -31,15 +31,15 @@ public abstract class BaseConverter {
     /**
      * 输入源
      */
-    protected String inputFileUrl;
+    protected String inputSource;
 
     /**
      * 输出源
      */
     protected List<String> outPathUrlList;
 
-    public BaseConverter(String inputPath) {
-        this.inputFileUrl = inputPath;
+    public BaseConverter(String inputSource) {
+        this.inputSource = inputSource;
         outPathUrlList = new ArrayList<>();
     }
 

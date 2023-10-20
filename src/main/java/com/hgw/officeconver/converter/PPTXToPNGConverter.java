@@ -30,7 +30,7 @@ public class PPTXToPNGConverter extends AbstractPPTToPNGConverter {
         InputStream is = null;
         XMLSlideShow ppt = null;
         try {
-            is = getInputStream(inputFileUrl);
+            is = getInputStream(inputSource);
             ppt = new XMLSlideShow(is);
             Dimension pgSize = ppt.getPageSize();
             List<CompletableFuture<String>> completableFutures = new ArrayList<>();

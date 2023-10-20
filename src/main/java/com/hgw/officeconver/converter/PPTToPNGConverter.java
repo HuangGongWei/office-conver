@@ -30,7 +30,7 @@ public class PPTToPNGConverter extends AbstractPPTToPNGConverter{
         InputStream is = null;
         HSLFSlideShow ppt = null;
         try {
-            is = getInputStream(inputFileUrl);
+            is = getInputStream(inputSource);
             ppt = new HSLFSlideShow(is);
             Dimension pgSize = ppt.getPageSize();
             List<CompletableFuture<String>> completableFutures = new ArrayList<>();
