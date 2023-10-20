@@ -258,6 +258,114 @@ public class PPTXToPNGConverter extends AbstractPPTToPNGConverter {
 
 
 
+# HTML转图片
+
+## 1. 万事第一步
+
+```xml
+<dependency>
+   <groupId>org.xhtmlrenderer</groupId>
+   <artifactId>core-renderer</artifactId>
+   <version>R8</version>
+</dependency>
+<dependency>
+  <groupId>net.sourceforge.nekohtml</groupId>
+  <artifactId>nekohtml</artifactId>
+  <version>1.9.14</version>
+</dependency>
+
+<dependency>
+  <groupId>gui.ava</groupId>
+  <artifactId>html2image</artifactId>
+  <version>2.0.1</version>
+</dependency>
+```
+
+这里 gui.ava 的jar包拉不下。本`src/main/resources/file`提供了相关jar包，同学们可将jar包直接copy至企业私仓或本地仓库即可。
+
+![image-20231020114629284](README.assets/image-20231020114629284.png)
+
+
+
+## 2. 撸代码
+
+> HTML转换器
+
+```java
+package com.hgw.officeconver.converter;
+
+import gui.ava.html.parser.HtmlParserImpl;
+import gui.ava.html.renderer.ImageRenderer;
+import gui.ava.html.renderer.ImageRendererImpl;
+import lombok.extern.slf4j.Slf4j;
+
+import javax.imageio.ImageIO;
+import java.awt.image.BufferedImage;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.util.List;
+import java.util.Objects;
+
+/**
+ * Description: HTML转换器
+ *
+ * @author LinHuiBa-YanAn
+ * @date 2023/10/19 15:51
+ */
+@Slf4j
+public class HtmlToPNGConverter extends BaseConverter{
+
+    public HtmlToPNGConverter(String inputSource) {
+        super(inputSource);
+    }
+
+    @Override
+    public List<String> convertToPNG() {
+        if (Objects.isNull(inputSource)) {
+            throw new RuntimeException( "html内容不能为空");
+        }
+        HtmlParserImpl htmlParser = new HtmlParserImpl();
+        htmlParser.loadHtml(inputSource);
+        ImageRenderer imageRenderer = new ImageRendererImpl(htmlParser);
+        BufferedImage img = imageRenderer.getBufferedImage();
+        ByteArrayOutputStream bos = new ByteArrayOutputStream();
+        try {
+            ImageIO.write(img, "png", bos);
+        } catch (IOException e) {
+            log.error("html转换图片失败,{}", e);
+            throw new RuntimeException("html转换图片失败" + e.getMessage());
+        }
+        outPathUrlList.add(uploadFileToOss(bos));
+        return outPathUrlList;
+    }
+
+}
+```
+
+
+
+## 验收一下
+
+```java
+@Test
+public void htmlToPNGConverterTest() {
+    String html = "<p style=\"line-height: 1;\">测试内容编辑</p><p style=\"line-height: 3;\">阿萨德和i</p><p style=\"line-height: 3;\">地址：杭州市余杭区溪西八方城11幢</p><p style=\"line-height: 3;\">来个图片</p><hr><p style=\"line-height: 3;\"><img style=\"width:100%;height:auto\" src=\"https://images.location.pub/FuvjKyKF5GRxf_PfrwEux4bP232T-pms_original\" class=\"editor--\" data-custom=\"id=wux-upload--1697682266313-1\">图片右侧文案</p><p style=\"line-height: 3;\">分割线</p><p style=\"line-height: 3;\"><br></p><hr><ul data-checked=\"false\"><li style=\"line-height: 3;\">哈哈1</li><li style=\"line-height: 3;\">哈哈2</li></ul><ul data-checked=\"true\"><li style=\"line-height: 3;\">哈哈选中（能看到吗）</li></ul><hr><p style=\"line-height: 3;\" class=\"ql-indent-1\">内容缩紧速度能达到收到</p><ol><li style=\"line-height: 3;\" class=\"ql-indent-1\">阿斯顿</li><li style=\"line-height: 3;\" class=\"ql-indent-1\">d s d</li><li style=\"line-height: 3;\" class=\"ql-indent-1\">说到底</li><li style=\"line-height: 3;\">说到底</li><li style=\"line-height: 3;\">3434 </li><li style=\"line-height: 3;\">当时的</li></ol><hr><p style=\"text-align: center; line-height: 3;\"><strong style=\"background-color: yellow; color: rgb(253, 49, 54); font-size: 18px;\"><del>背景色</del></strong></p><p style=\"line-height: 3;\"><span style=\"font-size: 14px;\"><img style=\"width:100%;height:auto\" src=\"https://images.location.pub/FrV26hFjDyKMgugwbH5uuSeyu94L-pms_original\" data-custom=\"id=wux-upload--1697634247667-1\" class=\"   \"></span></p><p style=\"line-height: 3;\"><span style=\"font-size: 14px;\">\uFEFF</span></p><p style=\"line-height: 3; text-align: center;\"><strong style=\"color: rgb(246, 140, 65); font-size: 18px;\"><em><u>无语佛啊啊</u></em></strong><strong style=\"color: rgb(246, 140, 65); font-size: 14px;\"><em><u>\uFEFF</u></em></strong></p><p style=\"text-align: left;\"><br></p><p style=\"text-align: left;\">sad</p><p style=\"text-align: left;\"><br></p><p><img style=\"width:100%;height:auto\" src=\"https://images.location.pub/FsXbCDwqZHVVl1fLXBZzkWxN4L-I-pms_original\" data-custom=\"id=wux-upload--1697633627669-1\" class=\" \"></p>";
+    HtmlToPNGConverter htmlToPNGConverter = new HtmlToPNGConverter(html);
+    List<String> urlList = htmlToPNGConverter.convertToPNG();
+    System.out.println(JSONObject.toJSONString(urlList));
+}
+```
+
+![image-20231020115008338](README.assets/image-20231020115008338.png)
+
+效果如下：
+
+~~~java
+["https://message-center-gc.oss-cn-hangzhou.aliyuncs.com/20231020000000000c76f731b-a6bc-44e3-9e23-82eae3608b13.png"]
+~~~
+
+<img src="README.assets/20231020000000000c76f731b-a6bc-44e3-9e23-82eae3608b13.png" alt="20231020000000000c76f731b-a6bc-44e3-9e23-82eae3608b13" style="zoom: 25%;" />
+
 
 
 # 踩坑经历
@@ -430,4 +538,33 @@ pdf效果：
     <artifactId>itextpdf</artifactId>
     <version>5.5.10</version>
 </dependency>
+```
+
+
+
+
+
+## 5、html转换时中文乱码问题
+
+老样子，我们在本地并没有出现，部署到linux服务器上之后便出现了中文乱码，如下图。
+
+![202310190000000004cfd1891-c06f-405f-ab17-091c1aaf73dd](README.assets/202310190000000004cfd1891-c06f-405f-ab17-091c1aaf73dd.png)
+
+没毛病又是字体的问题，参考以下两位大佬：
+
++ [https://www.cnblogs.com/tlll/p/7853106.html](https://www.cnblogs.com/tlll/p/7853106.html)
++ [https://blog.csdn.net/zhaikaiyun/article/details/123837429](https://blog.csdn.net/zhaikaiyun/article/details/123837429)
+
+解决方案，下载 sumSun.ttf 字体，配置至环境
+
+```
+RUN tar -xf /tmp/server-jre-8u202-linux-x64.tar.gz -C /opt && \
+    mkdir /opt/jdk1.8.0_202/jre/lib/fonts/fallback && \
+    cp /tmp/simsun.ttc /opt/jdk1.8.0_202/jre/lib/fonts/fallback/simsun.ttc && \
+    cp /tmp/simsun.ttf /opt/jdk1.8.0_202/jre/lib/fonts/fallback/simsun.ttf && \
+    rm -rf /tmp/* /var/cache/apk/*
+
+ENV JAVA_HOME=/opt/jdk1.8.0_202 \
+    CLASSPATH=/opt/jdk1.8.0_202/lib \
+    PATH=${PATH}:/opt/jdk1.8.0_202/bin
 ```
